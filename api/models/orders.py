@@ -21,7 +21,7 @@ class Order(Base):
     customer_id = Column(Integer, ForeignKey("customers.id"))
     tracking_number = Column(String(36), unique=True)
     status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
-    order_type = Column(String(20)) # Takeout/Delivery
+    order_type = Column(Enum(OrderType)) # Takeout/Delivery
     total_price = Column(DECIMAL(10, 2))
     created_at = Column(DATETIME, default=datetime.utcnow)
 
@@ -29,3 +29,4 @@ class Order(Base):
     items = relationship("OrderItem", back_populates="order")
     payment = relationship("Payment", back_populates="order", uselist=False)
     promos = relationship("OrderPromo", back_populates="order")
+    reviews = relationship("Review", back_populates="order")

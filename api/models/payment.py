@@ -10,7 +10,7 @@ class Payment(Base):
     order_id = Column(Integer, ForeignKey("orders.id"))
     payment_type = Column(String(50)) # e.g., Credit Card, Cash
     card_last4 = Column(String(4))
-    status = Column(String(50))
+    status = Column(String(50))       # pending / preparing / completed / failed
     amount = Column(DECIMAL(10, 2))
     paid_at = Column(DateTime)
 

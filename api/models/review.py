@@ -14,3 +14,4 @@ class Review(Base):
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     menu_item = relationship("MenuItem", back_populates="reviews")
+    order = relationship("Order", back_populates="reviews")

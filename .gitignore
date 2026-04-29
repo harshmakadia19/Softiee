@@ -92,3 +92,7 @@ docker-compose.override.yml
 .vercel/
 .netlify/
 .serverless/
+
+__pycache__/
+*.py[cod]
+*$py.class
