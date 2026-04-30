@@ -7,7 +7,7 @@ from .dependencies.config import conf
 
 
 app = FastAPI(
-    title="OROS: Online Restaurant Ordering System API",
+    title="Softiee OROS: Online Restaurant Ordering System API",
     description="Full API documentation for the Online Restaurant Ordering System.",
     version="1.0.0"
 )
