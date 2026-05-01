@@ -31,7 +31,7 @@ def update(db: Session, item_id: int, request):
     item = db.query(model.Customer).filter(model.Customer.id == item_id)
     if not item.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found!")
-    item.update(request.dict(exclude_unset=True))
+    item.update(request.model_dump(exclude_unset=True))
     db.commit()
     return item.first()
 

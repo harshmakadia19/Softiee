@@ -38,7 +38,7 @@ def update(db: Session, item_id: int, request):
     item_query = db.query(model.MenuItem).filter(model.MenuItem.id == item_id)
     if not item_query.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu item not found")
-    item_query.update(request.dict(exclude_unset=True))
+    item_query.update(request.model_dump(exclude_unset=True))
     db.commit()
     return item_query.first()
 

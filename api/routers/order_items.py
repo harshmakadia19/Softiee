@@ -1,24 +1,15 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from typing import List
-
 from ..controllers import order_items as controller
 from ..schemas import order_item as schema
 from ..dependencies.database import get_db
 
-router = APIRouter(
-    prefix="/order-items",
-    tags=['Order Items']
-)
+router = APIRouter(tags=['Order Details'], prefix="/order-items")
 
-@router.post("/", response_model=schema.OrderItemResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=schema.OrderItem)
 def create(request: schema.OrderItemCreate, db: Session = Depends(get_db)):
-    return controller.create(db, request)
+    return controller.create(db=db, request=request)
 
-@router.get("/order/{order_id}", response_model=List[schema.OrderItemResponse])
-def read_all_for_order(order_id: int, db: Session = Depends(get_db)):
+@router.get("/order/{order_id}", response_model=list[schema.OrderItem])
+def read_by_order(order_id: int, db: Session = Depends(get_db)):
     return controller.read_all_for_order(db, order_id)
-
-@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete(item_id: int, db: Session = Depends(get_db)):
-    return controller.delete(db, item_id)

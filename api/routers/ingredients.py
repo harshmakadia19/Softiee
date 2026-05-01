@@ -1,32 +1,28 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from typing import List
-
 from ..controllers import ingredients as controller
 from ..schemas import ingredient as schema
 from ..dependencies.database import get_db
 
-router = APIRouter(
-    prefix="/ingredients",
-    tags=['Ingredients']
-)
+router = APIRouter(tags=['Ingredients'], prefix="/ingredients")
 
-@router.post("/", response_model=schema.IngredientResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=schema.Ingredient)
 def create(request: schema.IngredientCreate, db: Session = Depends(get_db)):
-    return controller.create(db, request)
+    return controller.create(db=db, request=request)
 
-@router.get("/", response_model=List[schema.IngredientResponse])
+@router.get("/", response_model=list[schema.Ingredient])
 def read_all(db: Session = Depends(get_db)):
     return controller.read_all(db)
 
-@router.get("/{ingredient_id}", response_model=schema.IngredientResponse)
-def read_one(ingredient_id: int, db: Session = Depends(get_db)):
-    return controller.read_one(db, ingredient_id)
+@router.get("/{item_id}", response_model=schema.Ingredient)
+def read_one(item_id: int, db: Session = Depends(get_db)):
+    return controller.read_one(db, item_id=item_id)
 
-@router.put("/{ingredient_id}", response_model=schema.IngredientResponse)
-def update(ingredient_id: int, request: schema.IngredientUpdate, db: Session = Depends(get_db)):
-    return controller.update(db, ingredient_id, request)
+@router.put("/{item_id}", response_model=schema.Ingredient)
+def update(item_id: int, request: schema.IngredientUpdate, db: Session = Depends(get_db)):
+    return controller.update(db=db, request=request, item_id=item_id)
 
-@router.delete("/{ingredient_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete(ingredient_id: int, db: Session = Depends(get_db)):
-    return controller.delete(db, ingredient_id)
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete(item_id: int, db: Session = Depends(get_db)):
+    return controller.delete(db=db, item_id=item_id)
+

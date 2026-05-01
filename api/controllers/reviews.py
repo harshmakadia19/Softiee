@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status, Response
 from ..models import review as model
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 def create(db: Session, request):
     new_review = model.Review(
@@ -9,7 +9,7 @@ def create(db: Session, request):
         menu_item_id=request.menu_item_id,
         rating=request.rating,
         review_text=request.review_text,
-        created_at=datetime.now(timezone.utc) #
+        created_at=datetime.now(UTC) #
     )
     db.add(new_review)
     db.commit()
@@ -33,7 +33,7 @@ def update(db: Session, review_id: int, request):
     query = db.query(model.Review).filter(model.Review.id == review_id)
     if not query.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
-    query.update(request.dict(exclude_unset=True))
+    query.update(request.model_dump(exclude_unset=True))
     db.commit()
     return query.first()
 

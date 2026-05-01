@@ -9,14 +9,17 @@ router = APIRouter(
     prefix="/orders"
 )
 
-@router.post("/", response_model=schema.Order)
+@router.post("/", response_model=schema.Order, status_code=status.HTTP_201_CREATED)
 def create(request: schema.OrderCreate, db: Session = Depends(get_db)):
-    # Validates input against schema.OrderCreate
     return controller.create(db=db, request=request)
 
 @router.get("/", response_model=list[schema.Order])
 def read_all(db: Session = Depends(get_db)):
     return controller.read_all(db)
+
+@router.get("/track/{tracking_number}", response_model=schema.Order)
+def track_order(tracking_number: str, db: Session = Depends(get_db)):
+    return controller.read_by_tracking(db, tracking_number)
 
 @router.get("/{item_id}", response_model=schema.Order)
 def read_one(item_id: int, db: Session = Depends(get_db)):
@@ -24,7 +27,6 @@ def read_one(item_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{item_id}", response_model=schema.Order)
 def update(item_id: int, request: schema.OrderUpdate, db: Session = Depends(get_db)):
-    # Uses schema.OrderUpdate for partial updates
     return controller.update(db=db, request=request, item_id=item_id)
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)

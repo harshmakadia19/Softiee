@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from .order_item import OrderItem
 
 class OrderBase(BaseModel):
-    tracking_number: str
+    tracking_number: Optional[str] = None
     status: str
     order_type: str
     total_price: float

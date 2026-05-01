@@ -1,47 +1,50 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
-from fastapi import HTTPException, Response, status
-
+from fastapi import HTTPException, status, Response
 from ..models import ingredient as model
-from ..schemas import ingredient as schema
+from sqlalchemy.exc import SQLAlchemyError
 
-def create(db: Session, request: schema.IngredientCreate):
+
+def create(db: Session, request):
+    new_item = model.Ingredient(
+        name=request.name,
+        amount=request.amount,
+        unit=request.unit
+    )
     try:
-        new_ingredient = model.Ingredient(
-            name=request.name,
-            amount=request.amount,
-            unit=request.unit
-        )
-        db.add(new_ingredient)
+        db.add(new_item)
         db.commit()
-        db.refresh(new_ingredient)
-        return new_ingredient
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Database error occurred while creating ingredient.")
+        db.refresh(new_item)
+    except SQLAlchemyError as e:
+        error = str(e.__dict__.get('orig', e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
+    return new_item
+
 
 def read_all(db: Session):
     return db.query(model.Ingredient).all()
 
-def read_one(db: Session, ingredient_id: int):
-    ingredient = db.query(model.Ingredient).filter(model.Ingredient.id == ingredient_id).first()
-    if not ingredient:
-        raise HTTPException(status_code=404, detail="Ingredient not found")
-    return ingredient
 
-def update(db: Session, ingredient_id: int, request: schema.IngredientUpdate):
-    ingredient = read_one(db, ingredient_id)
-    
-    update_data = request.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(ingredient, key, value)
-        
+def read_one(db: Session, item_id: int):
+    item = db.query(model.Ingredient).filter(model.Ingredient.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingredient not found!")
+    return item
+
+
+def update(db: Session, item_id: int, request):
+    item_query = db.query(model.Ingredient).filter(model.Ingredient.id == item_id)
+    if not item_query.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingredient not found!")
+
+    item_query.update(request.model_dump(exclude_unset=True))
     db.commit()
-    db.refresh(ingredient)
-    return ingredient
+    return item_query.first()
 
-def delete(db: Session, ingredient_id: int):
-    ingredient = read_one(db, ingredient_id)
-    db.delete(ingredient)
+
+def delete(db: Session, item_id: int):
+    item_query = db.query(model.Ingredient).filter(model.Ingredient.id == item_id)
+    if not item_query.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingredient not found!")
+    item_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

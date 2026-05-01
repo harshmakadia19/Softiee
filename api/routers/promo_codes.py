@@ -1,32 +1,24 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from typing import List
-
 from ..controllers import promo_codes as controller
 from ..schemas import promo_code as schema
 from ..dependencies.database import get_db
 
-router = APIRouter(
-    prefix="/promo-codes",
-    tags=['Promo Codes']
-)
+router = APIRouter(tags=['Promo Codes'], prefix="/promo-codes")
 
-@router.post("/", response_model=schema.PromoCodeResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=schema.PromoCode)
 def create(request: schema.PromoCodeCreate, db: Session = Depends(get_db)):
-    return controller.create(db, request)
+    return controller.create(db=db, request=request)
 
-@router.get("/", response_model=List[schema.PromoCodeResponse])
+@router.get("/", response_model=list[schema.PromoCode])
 def read_all(db: Session = Depends(get_db)):
     return controller.read_all(db)
 
-@router.get("/{promo_code_id}", response_model=schema.PromoCodeResponse)
-def read_one(promo_code_id: int, db: Session = Depends(get_db)):
-    return controller.read_one(db, promo_code_id)
+@router.put("/{item_id}", response_model=schema.PromoCode)
+def update(item_id: int, request: schema.PromoCodeUpdate, db: Session = Depends(get_db)):
+    return controller.update(db=db, request=request, item_id=item_id)
 
-@router.put("/{promo_code_id}", response_model=schema.PromoCodeResponse)
-def update(promo_code_id: int, request: schema.PromoCodeUpdate, db: Session = Depends(get_db)):
-    return controller.update(db, promo_code_id, request)
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete(item_id: int, db: Session = Depends(get_db)):
+    return controller.delete(db=db, item_id=item_id)
 
-@router.delete("/{promo_code_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete(promo_code_id: int, db: Session = Depends(get_db)):
-    return controller.delete(db, promo_code_id)
