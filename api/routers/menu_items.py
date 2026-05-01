@@ -3,18 +3,11 @@ from sqlalchemy.orm import Session
 from ..controllers import menu_items as controller
 from ..schemas import menu_item as schema
 from ..dependencies.database import get_db
-from ..models import menu_item as model
+from typing import Optional
 
 router = APIRouter(tags=['Menu Items'], prefix="/menu")
 
-@router.post("/", response_model=schema.MenuItem)
-def create(request: schema.MenuItemCreate, db: Session = Depends(get_db)):
-    return controller.create(db=db, request=request)
-
-@router.get("/", response_model=list[schema.MenuItem])
-def read_all(category: str = Query(None), db: Session = Depends(get_db)):
-    return controller.read_all(db, category)
-
+# 1. FIXED: Specific paths must come BEFORE /{item_id}
 @router.get("/alerts/low-stock")
 def get_alerts(db: Session = Depends(get_db)):
     return controller.check_stock_alerts(db)
@@ -23,9 +16,20 @@ def get_alerts(db: Session = Depends(get_db)):
 def get_unpopular(db: Session = Depends(get_db)):
     return controller.get_unpopular_dishes(db)
 
+# 2. Main Menu / Search Logic
+@router.get("/", response_model=list[schema.MenuItem])
+def read_all(category: Optional[str] = Query(None, description="Optional: Filter by category (e.g. Vegetarian)"), db: Session = Depends(get_db)):
+    # If you leave the category box empty and hit 'Execute', it returns everything.
+    return controller.read_all(db, category)
+
+# 3. Generic ID paths go at the BOTTOM
 @router.get("/{item_id}", response_model=schema.MenuItem)
 def read_one(item_id: int, db: Session = Depends(get_db)):
     return controller.read_one(db, item_id)
+
+@router.post("/", response_model=schema.MenuItem, status_code=status.HTTP_201_CREATED)
+def create(request: schema.MenuItemCreate, db: Session = Depends(get_db)):
+    return controller.create(db=db, request=request)
 
 @router.put("/{item_id}", response_model=schema.MenuItem)
 def update(item_id: int, request: schema.MenuItemUpdate, db: Session = Depends(get_db)):
@@ -34,8 +38,3 @@ def update(item_id: int, request: schema.MenuItemUpdate, db: Session = Depends(g
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(item_id: int, db: Session = Depends(get_db)):
     return controller.delete(db, item_id)
-
-@router.get("/search", response_model=list[schema.MenuItem])
-def search_by_category(category: str = Query(..., description="Food category e.g., vegetarian, spicy"), db: Session = Depends(get_db)):
-    # Story #19: Search for specific types of food
-    return db.query(model.MenuItem).filter(model.MenuItem.category.ilike(f"%{category}%")).all()
