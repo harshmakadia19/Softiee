@@ -17,8 +17,3 @@ def read_all(menu_item_id: int = Query(None), db: Session = Depends(get_db)):
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(review_id: int, db: Session = Depends(get_db)):
     return controller.delete(db, review_id)
-
-from ..models import review as model
-@router.get("/dish/{menu_item_id}", response_model=list[schema.Review])
-def read_reviews_per_dish(menu_item_id: int, db: Session = Depends(get_db)):
-    return db.query(model.Review).filter(model.Review.menu_item_id == menu_item_id).all()
