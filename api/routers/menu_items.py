@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from ..controllers import menu_items as controller
 from ..schemas import menu_item as schema
 from ..dependencies.database import get_db
+from ..models import menu_item as model
 
 router = APIRouter(tags=['Menu Items'], prefix="/menu")
 
@@ -33,3 +34,8 @@ def update(item_id: int, request: schema.MenuItemUpdate, db: Session = Depends(g
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(item_id: int, db: Session = Depends(get_db)):
     return controller.delete(db, item_id)
+
+@router.get("/search", response_model=list[schema.MenuItem])
+def search_by_category(category: str = Query(..., description="Food category e.g., vegetarian, spicy"), db: Session = Depends(get_db)):
+    # Story #19: Search for specific types of food
+    return db.query(model.MenuItem).filter(model.MenuItem.category.ilike(f"%{category}%")).all()
