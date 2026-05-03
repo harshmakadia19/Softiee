@@ -123,11 +123,11 @@ api/
 
 ## 👥 Team Members — Team Softiee
 
-| Name | Role |
-|---|---|
-| Harsh Patel | Product Manager |
-| Shreem Patel | Scrum Master |
-| Tanishka Patel | Lead Developer |
+| Name                      | Role |
+|---------------------------|---|
+| Harsh Makadia             | Product Manager |
+| Shreem Dixit              | Scrum Master |
+| Tanishka Shankar Sonawane | Lead Developer |
 
 **Course:** ITSC-3155 Software Engineering
 
